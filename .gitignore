@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 pi/manual_profile.json
 ~$*.docx
+.venv-manual/

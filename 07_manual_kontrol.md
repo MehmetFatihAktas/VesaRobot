@@ -12,21 +12,35 @@ Xbox (Bluetooth) -> Raspberry Pi -> USB serial -> Teensy -> TMC2209 / servo
 - `pi/manual_cli.py` — seri terminal / komut satırı aracı
 - `pi/manual_xbox_bridge.py` — Xbox gamepad bridge
 - `pi/manual_profile.example.json` — hız, limit ve gamepad profil örneği
+- `pi/setup_manual_env.sh` — Python venv + bağımlılık kurulumu
+- `pi/run_manual_cli.sh` — portu otomatik bulup CLI açar
+- `pi/run_manual_xbox.sh` — portu otomatik bulup Xbox bridge başlatır
 - `03_pi_teensy_protokol.md` — JSON komutları
 
 ## 1. Pi Tarafı Kurulum
 
 ```bash
-python3 -m pip install -r pi/requirements-manual.txt
+cd ~/VesaRobot
+chmod +x pi/*.sh
+./pi/setup_manual_env.sh
 ```
 
 Xbox controller Linux'ta `bluetoothctl` ile eşleşmiş olmalı. Teensy USB ile `/dev/ttyACM0` olarak görünmeli.
+
+İzinler:
+
+```bash
+sudo usermod -aG dialout,input $USER
+newgrp dialout
+```
+
+Gerekirse oturumu kapatıp aç.
 
 Kontrol:
 
 ```bash
 ls /dev/ttyACM*
-python3 pi/manual_cli.py --port /dev/ttyACM0
+./pi/run_manual_cli.sh
 ```
 
 ## 2. İlk Seri Test (motor güçleri kapalıyken)
@@ -91,18 +105,12 @@ s[1] = bilek
 
 ## 5. Xbox Bridge
 
-Önce örnek profili kopyala:
-
-```bash
-cp pi/manual_profile.example.json pi/manual_profile.json
-```
-
-Gerekirse `serial_port`, limitler ve hızları düzenle.
+İlk çalıştırmada script `pi/manual_profile.json` dosyasını otomatik üretir. Gerekirse limit ve hızları oradan düzenle.
 
 Çalıştır:
 
 ```bash
-python3 pi/manual_xbox_bridge.py --profile pi/manual_profile.json
+./pi/run_manual_xbox.sh
 ```
 
 Varsayılan kontrol eşlemesi:
