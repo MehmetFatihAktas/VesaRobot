@@ -17,6 +17,7 @@
 #include <TMCStepper.h>
 #include <PWMServo.h>
 #include <Wire.h>
+#include <ArduinoJson.h>
 
 // ---------- Pin haritası (02_pin_map.md ile birebir) ----------
 constexpr uint8_t M1_STEP = 2,  M1_DIR = 3;
@@ -235,7 +236,6 @@ void sendDiag() {
 //      {"cmd":"en","on":1}\n
 //      {"cmd":"home"}\n
 
-#include <ArduinoJson.h>
 constexpr size_t JSON_BUF = 512;
 StaticJsonDocument<JSON_BUF> doc;
 String lineBuf;
