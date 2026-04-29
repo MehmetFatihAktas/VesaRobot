@@ -122,8 +122,12 @@ inline void tcaDisableAll() {
 }
 
 bool i2cProbe(uint8_t addr) {
-  Wire.beginTransmission(addr);
-  return Wire.endTransmission() == 0;
+  for (int attempt = 0; attempt < 3; attempt++) {
+    Wire.beginTransmission(addr);
+    if (Wire.endTransmission() == 0) return true;
+    delay(2);
+  }
+  return false;
 }
 
 // AS5600 ham açı okuma (0..4095)
@@ -167,10 +171,22 @@ void setMotorsEnabled(bool on) {
 }
 
 void sendI2CScan() {
-  StaticJsonDocument<256> d;
+  StaticJsonDocument<512> d;
   d["ack"] = true;
   d["msg"] = "scan_i2c";
-  d["pca"] = i2cProbe(PCA_ADDR);
+  JsonArray seen = d.createNestedArray("seen");
+  for (uint8_t addr = 1; addr < 127; addr++) {
+    if (i2cProbe(addr)) seen.add(addr);
+  }
+
+  d["pca"] = false;
+  for (JsonVariant v : seen) {
+    if ((uint8_t)v.as<int>() == PCA_ADDR) {
+      d["pca"] = true;
+      break;
+    }
+  }
+
   JsonArray ch = d.createNestedArray("channels");
   JsonArray enc = d.createNestedArray("enc");
   for (int i = 0; i < 4; i++) {
@@ -357,7 +373,7 @@ void setup() {
   }
 
   Wire.begin();
-  Wire.setClock(400000);
+  Wire.setClock(100000);
 
   servo1.attach(SERVO1_PIN);
   servo2.attach(SERVO2_PIN);
