@@ -91,11 +91,30 @@ class WindowsXboxBridge:
         self.prev_buttons: dict[int, bool] = {}
         self.last_print = 0.0
         self.last_tick = time.monotonic()
+        mapping_axes = self.profile["mapping"]["axes"]
+        self.centered_axes = {
+            int(mapping_axes["j1"]),
+            int(mapping_axes["j2"]),
+            int(mapping_axes["j3"]),
+            int(mapping_axes["j4"]),
+        }
+        self.axis_zero = self._capture_axis_zero()
+
+    def _capture_axis_zero(self) -> dict[int, float]:
+        samples: dict[int, list[float]] = {}
+        for _ in range(20):
+            pygame.event.pump()
+            for axis_idx in self.centered_axes:
+                samples.setdefault(axis_idx, []).append(float(self.js.get_axis(axis_idx)))
+            time.sleep(0.01)
+        return {idx: sum(vals) / len(vals) for idx, vals in samples.items()}
 
     def _axis(self, idx: int) -> float:
         if idx >= self.js.get_numaxes():
             return 0.0
         value = float(self.js.get_axis(idx))
+        if idx in self.centered_axes:
+            value -= self.axis_zero.get(idx, 0.0)
         dz = float(self.profile["deadzone"])
         return 0.0 if abs(value) < dz else value
 
@@ -146,6 +165,7 @@ class WindowsXboxBridge:
             "Windows Xbox bridge hazir. "
             "A basili tut = enable, B = stop, Start = home, Ctrl+C = cikis"
         )
+        print(f"Axis zero calibration: {self.axis_zero}")
 
         while True:
             pygame.event.pump()
