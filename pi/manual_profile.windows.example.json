@@ -1,0 +1,47 @@
+{
+  "serial_port": "",
+  "baudrate": 115200,
+  "tick_hz": 20.0,
+  "deadzone": 0.18,
+  "joint_max_speed_deg_s": [20.0, 15.0, 15.0, 20.0],
+  "joint_limits_deg": [
+    [-180.0, 180.0],
+    [-90.0, 90.0],
+    [-110.0, 110.0],
+    [-110.0, 110.0]
+  ],
+  "servo_step_deg_s": {
+    "wrist": 60.0,
+    "gripper": 90.0
+  },
+  "servo_limits_deg": {
+    "wrist": [0.0, 180.0],
+    "gripper": [0.0, 180.0]
+  },
+  "command_speed_deg_s": 25.0,
+  "command_accel_deg_s2": 50.0,
+  "invert_axes": {
+    "j1": false,
+    "j2": true,
+    "j3": true,
+    "j4": false
+  },
+  "mapping": {
+    "axes": {
+      "j1": 0,
+      "j2": 1,
+      "j4": 3,
+      "j3": 4,
+      "lt": 2,
+      "rt": 5
+    },
+    "buttons": {
+      "deadman_a": 0,
+      "stop_b": 1,
+      "wrist_lb": 4,
+      "wrist_rb": 5,
+      "home_start": 7
+    }
+  },
+  "print_telemetry_hz": 2.0
+}

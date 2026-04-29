@@ -1,5 +1,7 @@
 __pycache__/
 *.pyc
 pi/manual_profile.json
+pi/manual_profile.windows.json
 ~$*.docx
 .venv-manual/
+.venv-manual-win/

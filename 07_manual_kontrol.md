@@ -11,10 +11,15 @@ Xbox (Bluetooth) -> Raspberry Pi -> USB serial -> Teensy -> TMC2209 / servo
 
 - `pi/manual_cli.py` — seri terminal / komut satırı aracı
 - `pi/manual_xbox_bridge.py` — Xbox gamepad bridge
+- `pi/manual_xbox_bridge_win.py` — Windows + Xbox + COM bridge
 - `pi/manual_profile.example.json` — hız, limit ve gamepad profil örneği
+- `pi/manual_profile.windows.example.json` — Windows Xbox profil örneği
 - `pi/setup_manual_env.sh` — Python venv + bağımlılık kurulumu
+- `pi/setup_manual_env_win.ps1` — Windows venv + bağımlılık kurulumu
 - `pi/run_manual_cli.sh` — portu otomatik bulup CLI açar
 - `pi/run_manual_xbox.sh` — portu otomatik bulup Xbox bridge başlatır
+- `pi/run_manual_cli_win.ps1` — Windows CLI launcher
+- `pi/run_manual_xbox_win.ps1` — Windows Xbox launcher
 - `03_pi_teensy_protokol.md` — JSON komutları
 
 ## 1. Pi Tarafı Kurulum
@@ -124,6 +129,52 @@ Right Y     -> J3
 Right X     -> J4
 LB / RB     -> bilek servo
 LT / RT     -> gripper servo
+```
+
+## 5B. Windows + Xbox Bridge
+
+Windows tarafında Linux `evdev` sürümü değil, `pygame` tabanlı bridge kullanılır.
+
+Kurulum:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\pi\setup_manual_env_win.ps1
+```
+
+CLI:
+
+```powershell
+.\pi\run_manual_cli_win.ps1
+```
+
+Xbox bridge:
+
+```powershell
+.\pi\run_manual_xbox_win.ps1
+```
+
+İlk çalıştırmada `pi/manual_profile.windows.json` oluşturulur. Varsayılan eşleme:
+
+```text
+A           -> basılı tutunca enable (deadman)
+B           -> stop + disable
+Start       -> home
+Left X      -> J1
+Left Y      -> J2
+Right Y     -> J3
+Right X     -> J4
+LB / RB     -> bilek servo
+LT / RT     -> gripper servo
+```
+
+Not:
+
+- COM port otomatik bulunur (`VID_16C0 PID_0483`)
+- Gerekirse manuel ver:
+
+```powershell
+.\pi\run_manual_xbox_win.ps1 COM5
 ```
 
 ## 6. Güvenlik Kuralları
