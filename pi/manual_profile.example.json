@@ -1,0 +1,31 @@
+{
+  "serial_port": "/dev/ttyACM0",
+  "baudrate": 115200,
+  "controller_name_contains": "Xbox",
+  "tick_hz": 20.0,
+  "deadzone": 0.18,
+  "joint_max_speed_deg_s": [45.0, 30.0, 30.0, 40.0],
+  "joint_limits_deg": [
+    [-180.0, 180.0],
+    [-90.0, 90.0],
+    [-110.0, 110.0],
+    [-110.0, 110.0]
+  ],
+  "servo_step_deg_s": {
+    "wrist": 90.0,
+    "gripper": 120.0
+  },
+  "servo_limits_deg": {
+    "wrist": [0.0, 180.0],
+    "gripper": [0.0, 180.0]
+  },
+  "command_speed_deg_s": 45.0,
+  "command_accel_deg_s2": 90.0,
+  "invert_axes": {
+    "j1": false,
+    "j2": true,
+    "j3": true,
+    "j4": false
+  },
+  "print_telemetry_hz": 2.0
+}

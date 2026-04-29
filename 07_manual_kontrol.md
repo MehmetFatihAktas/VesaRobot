@@ -1,0 +1,138 @@
+# RobotKOL — Manuel Kontrol ve Bring-up
+
+Bu fazın amacı otonom tarafı devreye almadan önce şu zinciri doğrulamaktır:
+
+```text
+Xbox (Bluetooth) -> Raspberry Pi -> USB serial -> Teensy -> TMC2209 / servo
+                                           \-> PCA9548A -> AS5600
+```
+
+## Dosyalar
+
+- `pi/manual_cli.py` — seri terminal / komut satırı aracı
+- `pi/manual_xbox_bridge.py` — Xbox gamepad bridge
+- `pi/manual_profile.example.json` — hız, limit ve gamepad profil örneği
+- `03_pi_teensy_protokol.md` — JSON komutları
+
+## 1. Pi Tarafı Kurulum
+
+```bash
+python3 -m pip install -r pi/requirements-manual.txt
+```
+
+Xbox controller Linux'ta `bluetoothctl` ile eşleşmiş olmalı. Teensy USB ile `/dev/ttyACM0` olarak görünmeli.
+
+Kontrol:
+
+```bash
+ls /dev/ttyACM*
+python3 pi/manual_cli.py --port /dev/ttyACM0
+```
+
+## 2. İlk Seri Test (motor güçleri kapalıyken)
+
+CLI içinde sırayla:
+
+```text
+ping
+scan
+diag
+telemetry on
+status
+```
+
+Beklenen:
+
+- `ping` -> `{"ack":true,"msg":"pong"}`
+- `scan` -> `pca=true`, `enc=[true,true,true,true]`
+- `diag` -> `channels=[1,2,4,6]`
+- `status_md=true`, `status_ml=false`, `status_mh=false` ideal
+
+Bu aşamada servo ve motor güçleri kapalı olabilir; amaç encoder/PCA hattını doğrulamaktır.
+
+## 3. Tek Eksen Manuel Test
+
+Önce sadece tek TMC + tek motor hattını enerjilendir.
+
+CLI:
+
+```text
+en 1
+move_deg 5 0 0 0 20 40
+move_deg 0 0 0 0 20 40
+stop
+en 0
+```
+
+Beklenen:
+
+- Motor yumuşak kalkar/durur
+- `joint_deg` komut yönünde değişir
+- ilgili `enc_deg` fiziksel hareketi takip eder
+
+Sorun varsa 4 motoru birlikte deneme.
+
+## 4. Servo Testi
+
+Servo güçleri açıkken:
+
+```text
+servo 90 90
+servo 120 90
+servo 60 120
+```
+
+Not: protokolde `servo` sırası:
+
+```text
+s[0] = gripper
+s[1] = bilek
+```
+
+## 5. Xbox Bridge
+
+Önce örnek profili kopyala:
+
+```bash
+cp pi/manual_profile.example.json pi/manual_profile.json
+```
+
+Gerekirse `serial_port`, limitler ve hızları düzenle.
+
+Çalıştır:
+
+```bash
+python3 pi/manual_xbox_bridge.py --profile pi/manual_profile.json
+```
+
+Varsayılan kontrol eşlemesi:
+
+```text
+A           -> basılı tutunca hareket enable (deadman)
+B           -> stop + disable
+Left X      -> J1
+Left Y      -> J2
+Right Y     -> J3
+Right X     -> J4
+LB / RB     -> bilek servo
+LT / RT     -> gripper servo
+```
+
+## 6. Güvenlik Kuralları
+
+- İlk açılışta robot kol mekanik olarak boşlukta olsun
+- Motorları ilk kez düşük hızda test et
+- `A` bırakılınca bridge `stop` + `en:0` gönderir
+- Teensy tarafında `500 ms` komut gelmezse watchdog motorları serbest bırakır
+- `home` komutu şu aşamada **fiziksel homing değil**, sadece step sayacını sıfırlar
+
+## 7. Test Sırası
+
+1. `manual_cli.py` ile `ping`
+2. `scan` + `diag`
+3. tek motor
+4. dört motor
+5. servo
+6. Xbox bridge
+
+Otonom tarafına bundan önce geçme.
